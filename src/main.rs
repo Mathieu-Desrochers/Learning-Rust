@@ -78,7 +78,7 @@ fn references() {
     let x2_r = &x2;
 
     // these are the same
-    // this is great for the same code
+    // this is great since the same code
     // works on values and on references
     let _y2_a = &((*x2_r).callcode);
     let _y2_b = &(x2.callcode);
@@ -93,12 +93,59 @@ fn references() {
     x3.sort();
 
     // can get reference to any expression
-    // it gets an anonymous variable for as long as needed
+    // it gets an anonymous variable
     let x4 = &(1 + 2);
     let _y4 = x4 + &3;
+}
+
+fn lifetimes_basics() {
+    // references must have shorter lifetimes
+    // than the values they point to
+    let _reference: &i32;
+    {
+        let _value = 1;
+        // this will not compile
+        //_reference = &_value;
+    }
+}
+
+// lifetimes can be declared on functions
+// here is what is implied when nothing is spelled out
+fn _lifetimes_explicit<'a, 'b, 'c>(_x: &'a Vec<i32>, _y: &'b i32) -> &'c i32 {
+    return &0;
+}
+
+// when a function returns a reference
+// and there is a single reference argument
+// rust assumes they have the same lifetimes
+fn _lifetimes_explicit_simple_case<'a>(x: &'a Vec<i32>) -> &'a i32 {
+    return &x[0];
+}
+
+// this can be used to bind the lifetime of a function's result
+// to the lifetimes of its parameters
+fn lifetimes_bound<'a, 'b>(x: &'a Vec<i32>, y: &'b usize) -> &'a i32 {
+    return &x[*y];
+}
+
+fn lifetimes() {
+    lifetimes_basics();
+
+    // vector must live as long as result
+    // since result points to one of its elements
+    // we expressed this with 'a
+    let vector = vec![1, 2, 3];
+    let _result;
+    {
+        // index must live only for the function call
+        // we do not care otherwise
+        let index: usize = 0;
+        _result = lifetimes_bound(&vector, &index);
+    }
 }
 
 fn main() {
     ownership();
     references();
+    lifetimes();
 }
