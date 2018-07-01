@@ -78,7 +78,7 @@ fn references() {
     let x2_r = &x2;
 
     // these are the same
-    // this is great since the same code
+    // this is great because the same code
     // works on values and on references
     let _y2_a = &((*x2_r).callcode);
     let _y2_b = &(x2.callcode);
@@ -105,7 +105,7 @@ fn lifetimes_basics() {
     {
         let _value = 1;
         // this will not compile
-        //_reference = &_value;
+        // _reference = &_value;
     }
 }
 
@@ -159,9 +159,86 @@ fn lifetimes_structs() {
     let _piano = Piano { _keys: &keys };
 }
 
+fn mutability() {
+    // values are immutable by default
+    // _x1 = 26 will not compile
+    let _x1 = 25;
+
+    // immutability extends inside the variable
+    // _x2.push(4) will not compile
+    let _x2 = vec![1, 2, 3];
+
+    // tree structure to
+    // illustrate next points
+    struct Leaf {
+        _value: i32,
+    };
+    struct Branch {
+        left: Leaf,
+        right: Leaf,
+    };
+    struct Root {
+        left: Branch,
+        right: Branch,
+    };
+
+    let mut root = Root {
+        left: Branch {
+            left: Leaf { _value: 1 },
+            right: Leaf { _value: 2 },
+        },
+        right: Branch {
+            left: Leaf { _value: 3 },
+            right: Leaf { _value: 4 },
+        },
+    };
+
+    // multiple read references are allowed
+    // inside the same ownership tree
+    {
+        let _root_left = &root.left;
+        let _root_left_left = &root.left.left;
+    }
+
+    // a read reference in the tree makes the children
+    // and the ancestors immutable
+    // we looking; no touchy
+    {
+        let _root_left = &root.left;
+
+        // these will not compile
+        // let _root_left_left = &mut root.left.left;
+        // let _root = &mut root;
+
+        // other parts of the tree are free game
+        let _root_right = &mut root.right;
+    }
+
+    // a mutable reference in the tree makes the children
+    // accessible only through that reference
+    // and the ancestors inaccessible
+    // we touchy, no looking
+    {
+        let root_left = &mut root.left;
+
+        // these will not compile
+        // let _root_left_left = &root.left.left;
+        // let _root = &root;
+
+        // other parts of the tree are free game
+        let _root_right = &root.right;
+
+        // children are accessible through
+        // the mutable reference
+        let _root_left_left = &root_left.left;
+        let _root_left_right = &mut root_left.right;
+    }
+}
+
 fn main() {
     ownership();
     references();
     lifetimes();
     lifetimes_structs();
+    mutability();
 }
