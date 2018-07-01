@@ -116,14 +116,14 @@ fn _lifetimes_explicit<'a, 'b, 'c>(_x: &'a Vec<i32>, _y: &'b i32) -> &'c i32 {
 }
 
 // when a function returns a reference
-// and there is a single reference argument
+// and takes only one reference parameter
 // rust assumes they have the same lifetimes
 fn _lifetimes_explicit_simple_case<'a>(x: &'a Vec<i32>) -> &'a i32 {
     return &x[0];
 }
 
-// this can be used to bind the lifetime of a function's result
-// to the lifetimes of its parameters
+// this declaration limits the lifetime of the function's result
+// to the lifetime of its first parameter
 fn lifetimes_bound<'a, 'b>(x: &'a Vec<i32>, y: &'b usize) -> &'a i32 {
     return &x[*y];
 }
@@ -131,8 +131,8 @@ fn lifetimes_bound<'a, 'b>(x: &'a Vec<i32>, y: &'b usize) -> &'a i32 {
 fn lifetimes() {
     lifetimes_basics();
 
-    // vector must live as long as result
-    // since result points to one of its elements
+    // result cannot live longer than vector
+    // since it points to one of vector's elements
     // we expressed this with 'a
     let vector = vec![1, 2, 3];
     let _result;
@@ -144,8 +144,24 @@ fn lifetimes() {
     }
 }
 
+fn lifetimes_structs() {
+    // lifetimes must be declared inside structs
+    // this limits the lifetime of the struct
+    // to the lifetimes of its references
+    struct Piano<'a> {
+        _keys: &'a i32,
+    };
+
+    // piano cannot live longer than keys
+    // since it has a reference to keys
+    // we expressed this with 'a
+    let keys = 64;
+    let _piano = Piano { _keys: &keys };
+}
+
 fn main() {
     ownership();
     references();
     lifetimes();
+    lifetimes_structs();
 }
