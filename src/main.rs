@@ -235,10 +235,45 @@ fn mutability() {
     }
 }
 
+fn errors_success() -> Result<i32, String> {
+    Ok(1)
+}
+
+fn _errors_failure() -> Result<i32, String> {
+    Err("Uh oh".to_string())
+}
+
+fn errors() {
+    // results must be consumed
+    // errors_success() will generate a warning
+    let _x1 = match errors_success() {
+        Ok(value) => value,
+        Err(error) => panic!("{}", error),
+    };
+
+    // this often is reduced to one
+    // character using the ? operator
+    fn propagation() -> Result<i32, String> {
+        // either gets the success value
+        // or propagates the error to the caller
+        let y = errors_success()?;
+        Ok(y + 1)
+    };
+
+    // ignore a result
+    let _ = propagation();
+
+    // cause a panic on error
+    // better be real sure
+    let _x2 = errors_success().unwrap();
+    let _x3 = errors_success().expect("Ugh");
+}
+
 fn main() {
     ownership();
     references();
     lifetimes();
     lifetimes_structs();
     mutability();
+    errors();
 }
