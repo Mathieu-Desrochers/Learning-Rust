@@ -269,6 +269,18 @@ fn errors() {
     let _x3 = errors_success().expect("Ugh");
 }
 
+#[test]
+fn unit_test() {
+    assert_eq!(1, 1);
+}
+
+/// Actually run by cargo test for library crates.
+///
+///     assert_eq!(documentation(), "You bet");
+pub fn documentation() -> String {
+    "You bet".to_string()
+}
+
 fn main() {
     ownership();
     references();
