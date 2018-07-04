@@ -7,15 +7,15 @@ fn ownership() {
 
     // assignation moves ownership
     // x1 is left uninitialized
-    // let z1 = x1 will not compile
     let x1: Vec<i32> = Vec::new();
     let _y1 = x1;
+    // COMPILE ERROR: let z1 = x1;
 
     // passing a parameter also moves ownership
     // x2 is left uninitialized
-    // let z2 = x2 will not compile
     let x2: Vec<i32> = Vec::new();
     ownership_move(x2);
+    // COMPILE ERROR: let z2 = x2;
 
     // copiable types are an exception
     let x3 = 1;
@@ -23,10 +23,10 @@ fn ownership() {
     let _z3 = x3;
 
     // cannot move value out of its owner
-    // let y4 = x4[0] will not compile
     let mut x4 = Vec::new();
     x4.push("a".to_string());
     x4.push("b".to_string());
+    // COMPILE ERROR: let y4 = x4[0];
 
     // can move value out of Option though
     // x5[0] is left as None
@@ -37,12 +37,12 @@ fn ownership() {
 
     // loops move ownership of a
     // container and their elements
-    // let _z6 = x6 will not compile
-    // let _z6 = x6[0] will not compile
     let mut x6 = Vec::new();
     x6.push(Some("a".to_string()));
     x6.push(Some("b".to_string()));
     for _y6 in x6 {}
+    // COMPILE ERROR: let _z6 = x6;
+    // COMPILE ERROR: let _z6 = x6[0];
 }
 
 fn references_shared(x: &HashMap<String, String>) {
@@ -58,12 +58,14 @@ fn references() {
     // without moving ownership
 
     // passing a reference parameter does not move ownership
-    // let _y1 = x1 will compile
     let mut x1: HashMap<String, String> = HashMap::new();
     x1.insert("LAX".to_string(), "Los Angeles".to_string());
     x1.insert("YUL".to_string(), "Montréal".to_string());
     references_shared(&x1);
     references_mutable(&mut x1);
+
+    // all good
+    let _y1 = x1;
 
     // the dot operator implicitly deferences
     // so do arithmetic and comparaison operators
@@ -104,8 +106,7 @@ fn lifetimes_basics() {
     let _reference: &i32;
     {
         let _value = 1;
-        // this will not compile
-        // _reference = &_value;
+        // COMPILE ERROR: _reference = &_value;
     }
 }
 
@@ -161,12 +162,12 @@ fn lifetimes_structs() {
 
 fn mutability() {
     // values are immutable by default
-    // _x1 = 26 will not compile
     let _x1 = 25;
+    // COMPILE ERROR: _x1 = 26;
 
     // immutability extends inside the variable
-    // _x2.push(4) will not compile
     let _x2 = vec![1, 2, 3];
+    // COMPILE ERROR: _x2.push(4);
 
     // tree structure to
     // illustrate next points
@@ -206,7 +207,7 @@ fn mutability() {
     {
         let _root_left = &root.left;
 
-        // these will not compile
+        // COMPILE ERRORS:
         // let _root_left_left = &mut root.left.left;
         // let _root = &mut root;
 
@@ -221,7 +222,7 @@ fn mutability() {
     {
         let root_left = &mut root.left;
 
-        // these will not compile
+        // COMPILE ERRORS:
         // let _root_left_left = &root.left.left;
         // let _root = &root;
 
@@ -269,6 +270,66 @@ fn errors() {
     let _x3 = errors_success().expect("Ugh");
 }
 
+fn structs() {
+    // named-field
+    #[allow(dead_code)]
+    struct Pizza {
+        size: u8,
+        cheese_name: String,
+        with_bacon: bool,
+    }
+
+    let small = Pizza {
+        size: 8,
+        cheese_name: "Mozzarella".to_string(),
+        with_bacon: true,
+    };
+
+    // populate fields from local variables
+    // having the same name
+    fn _medium(cheese_name: String, with_bacon: bool) -> Pizza {
+        Pizza {
+            size: 12,
+            cheese_name,
+            with_bacon,
+        }
+    }
+
+    // populate fields from another instance
+    let _large = Pizza { size: 16, ..small };
+
+    // tuple-like
+    struct RgbColor(u8, u8, u8);
+    let black = RgbColor(0, 0, 0);
+    let _red = black.0;
+    let _green = black.1;
+    let _blue = black.2;
+
+    // unit-like
+    struct Square;
+    let _square = Square;
+}
+
+fn associated_functions() {
+    struct Dog {
+        is_good_boy: bool,
+    }
+
+    // implementation block
+    impl Dog {
+        fn bark(&self) -> String {
+            if self.is_good_boy {
+                "ruff".to_string()
+            } else {
+                "ruffff ruf! ruff!!!".to_string()
+            }
+        }
+    }
+
+    // just one small ruff
+    Dog { is_good_boy: true }.bark();
+}
+
 #[test]
 fn unit_test() {
     assert_eq!(1, 1);
@@ -288,4 +349,6 @@ fn main() {
     lifetimes_structs();
     mutability();
     errors();
+    structs();
+    associated_functions();
 }
