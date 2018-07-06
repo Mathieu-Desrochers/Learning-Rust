@@ -275,22 +275,19 @@ fn structs() {
     #[allow(dead_code)]
     struct Pizza {
         size: u8,
-        cheese_name: String,
         with_bacon: bool,
     }
 
     let small = Pizza {
         size: 8,
-        cheese_name: "Mozzarella".to_string(),
         with_bacon: true,
     };
 
     // populate fields from local variables
     // having the same name
-    fn _medium(cheese_name: String, with_bacon: bool) -> Pizza {
+    fn _medium(with_bacon: bool) -> Pizza {
         Pizza {
             size: 12,
-            cheese_name,
             with_bacon,
         }
     }
@@ -311,23 +308,81 @@ fn structs() {
 }
 
 fn associated_functions() {
-    struct Dog {
+    struct _Dog {
         is_good_boy: bool,
     }
 
     // implementation block
-    impl Dog {
-        fn bark(&self) -> String {
+    impl _Dog {
+        fn _bark(&self) -> String {
             if self.is_good_boy {
                 "ruff".to_string()
             } else {
-                "ruffff ruf! ruff!!!".to_string()
+                "ruffff RUF! ruff!!!".to_string()
             }
         }
     }
+}
 
-    // just one small ruff
-    Dog { is_good_boy: true }.bark();
+fn enums() {
+    #[allow(dead_code)]
+    enum Speed {
+        Slow,
+        TooFast,
+    }
+
+    // with tuple data
+    #[allow(dead_code)]
+    enum Shape {
+        Circle(u32),
+        Rectangle(u32, u32),
+    }
+
+    // with struct data
+    #[allow(dead_code)]
+    enum Monster {
+        Rat { rabid: bool },
+        Vampire { blood_thristy: bool, bat_form: bool },
+    }
+
+    // patterns
+    let x1 = Speed::Slow;
+    let _y1 = match x1 {
+        Speed::Slow => "All good",
+        Speed::TooFast => "Slow down you crazy",
+    };
+
+    // multiple values
+    let x2 = 100;
+    let _y2 = match x2 {
+        0...100 => "Small",
+        101 | 102 | 103 => "Medium",
+        _ => "Big",
+    };
+
+    // guards
+    let x3 = Shape::Rectangle(10, 20);
+    let _y3 = match x3 {
+        Shape::Rectangle(h, _) if h > 100 => "You a tall rectangle",
+        Shape::Rectangle(_, _) => "You an ok rectangle",
+        _ => "You no rectangle at all",
+    };
+
+    // ignored fields
+    let x4 = Monster::Vampire {
+        blood_thristy: true,
+        bat_form: false,
+    };
+    let _y4 = match x4 {
+        Monster::Rat { .. } => "Squish",
+        Monster::Vampire { blood_thristy: true, .. } => "We are so done...",
+        Monster::Vampire { .. } => "Keep calm",
+    };
+
+    // check only one pattern
+    if let Shape::Circle(r) = x3 {
+        let _area = 3.14 * (r as f32) * (r as f32);
+    }
 }
 
 #[test]
@@ -351,4 +406,5 @@ fn main() {
     errors();
     structs();
     associated_functions();
+    enums();
 }
