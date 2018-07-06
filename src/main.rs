@@ -312,14 +312,9 @@ fn associated_functions() {
         is_good_boy: bool,
     }
 
-    // implementation block
     impl _Dog {
         fn _bark(&self) -> String {
-            if self.is_good_boy {
-                "ruff".to_string()
-            } else {
-                "ruffff RUF! ruff!!!".to_string()
-            }
+            "ruf".to_string()
         }
     }
 }
@@ -345,14 +340,14 @@ fn enums() {
         Vampire { blood_thristy: bool, bat_form: bool },
     }
 
-    // patterns
+    // matching patterns
     let x1 = Speed::Slow;
     let _y1 = match x1 {
         Speed::Slow => "All good",
         Speed::TooFast => "Slow down you crazy",
     };
 
-    // multiple values
+    // with multiple values
     let x2 = 100;
     let _y2 = match x2 {
         0...100 => "Small",
@@ -360,7 +355,7 @@ fn enums() {
         _ => "Big",
     };
 
-    // guards
+    // with guards
     let x3 = Shape::Rectangle(10, 20);
     let _y3 = match x3 {
         Shape::Rectangle(h, _) if h > 100 => "You a tall rectangle",
@@ -368,18 +363,21 @@ fn enums() {
         _ => "You no rectangle at all",
     };
 
-    // ignored fields
+    // with fields
     let x4 = Monster::Vampire {
         blood_thristy: true,
         bat_form: false,
     };
     let _y4 = match x4 {
         Monster::Rat { .. } => "Squish",
-        Monster::Vampire { blood_thristy: true, .. } => "We are so done...",
+        Monster::Vampire {
+            blood_thristy: true,
+            ..
+        } => "We are so done...",
         Monster::Vampire { .. } => "Keep calm",
     };
 
-    // check only one pattern
+    // match a single pattern
     if let Shape::Circle(r) = x3 {
         let _area = 3.14 * (r as f32) * (r as f32);
     }
