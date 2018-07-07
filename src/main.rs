@@ -369,18 +369,56 @@ fn enums() {
         bat_form: false,
     };
     let _y4 = match x4 {
-        Monster::Rat { .. } => "Squish",
+        Monster::Rat { .. } => "Squishy",
         Monster::Vampire {
             blood_thristy: true,
             ..
-        } => "We are so done...",
+        } => "We are sooo done...",
         Monster::Vampire { .. } => "Keep calm",
     };
 
-    // match a single pattern
+    // with borrowed references
+    let _z4 = match x4 {
+        Monster::Rat { ref rabid } => *rabid,
+        _ => false,
+    };
+
+    // with no unpacking
+    let x5 = Shape::Rectangle(10, 20);
+    let _y5 = match x5 {
+        circle @ Shape::Circle(_) => circle,
+        rectangle @ Shape::Rectangle(_, _) => rectangle,
+    };
+
+    // testing a single pattern
     if let Shape::Circle(r) = x3 {
         let _area = 3.14 * (r as f32) * (r as f32);
     }
+}
+
+fn patterns() {
+    // unpacking structs
+    #[allow(dead_code)]
+    struct Mission {
+        objective: String,
+        soldiers_count: u8,
+    };
+    let x1 = Mission {
+        objective: "Raid candy shop".to_string(),
+        soldiers_count: 6,
+    };
+    #[allow(unused_variables)]
+    let Mission {
+        objective,
+        ..
+    } = x1;
+
+    // unpacking tuples
+    // and one received in parameter at that
+    fn receives_tuple((a, b, c): (u8, u8, u8)) -> u8 {
+        a + b + c
+    }
+    receives_tuple((1, 2, 3));
 }
 
 #[test]
@@ -405,4 +443,5 @@ fn main() {
     structs();
     associated_functions();
     enums();
+    patterns();
 }
