@@ -396,7 +396,7 @@ fn enums() {
     }
 }
 
-fn patterns() {
+fn unpacking() {
     // unpacking structs
     #[allow(dead_code)]
     struct Mission {
