@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
+use std::hash::Hash;
 
 fn ownership_move(_x: Vec<i32>) {}
 
@@ -396,29 +398,57 @@ fn enums() {
     }
 }
 
-fn unpacking() {
-    // unpacking structs
-    #[allow(dead_code)]
-    struct Mission {
-        objective: String,
-        soldiers_count: u8,
-    };
-    let x1 = Mission {
-        objective: "Raid candy shop".to_string(),
-        soldiers_count: 6,
-    };
-    #[allow(unused_variables)]
-    let Mission {
-        objective,
-        ..
-    } = x1;
+fn traits() {
+    trait Eatable {
+        fn eat_it(&self);
 
-    // unpacking tuples
-    // and one received in parameter at that
-    fn receives_tuple((a, b, c): (u8, u8, u8)) -> u8 {
-        a + b + c
+        // provide default implementation
+        fn chump_it(&self, _speed: u8) {
+            self.eat_it();
+        }
     }
-    receives_tuple((1, 2, 3));
+
+    // adding traits to types
+    impl Eatable for i32 {
+        fn eat_it(&self) {}
+    }
+
+    impl Eatable for f64 {
+        fn eat_it(&self) {}
+    }
+
+    // trait objects
+    let x1: &Eatable = &12;
+    fn have_quick_snack(_eatable: &Eatable) {}
+    have_quick_snack(x1);
+
+    // trait objects add runtime overhead
+    // the type of eatable could be i32 or f64
+    // it is unknown a compile time for public functions
+
+    // but traits can be mixed and matched inside boxes
+    let mut x2: Vec<Box<Eatable>> = Vec::new();
+    x2.push(Box::new(12));
+    x2.push(Box::new(3.456));
+
+    // fully qualified trait method
+    Eatable::eat_it(&9.999);
+
+    // generics can be bound to traits
+    fn have_lunch<E: Eatable>(_eatables: Vec<E>) {}
+    have_lunch(vec![1, 6, 2]);
+
+    // generics make the compiled code bigger
+    // different versions of have_lunch are compiled
+    // one for each E used by the program
+
+    // bounds can be a combinaison of traits
+    fn _eat_debugable<E: Eatable + Debug>(_eatables: Vec<E>) {}
+    fn _eat_hashable<E>(_eatables: Vec<E>)
+    where
+        E: Eatable + Hash,
+    {
+    }
 }
 
 #[test]
@@ -443,5 +473,5 @@ fn main() {
     structs();
     associated_functions();
     enums();
-    unpacking();
+    traits();
 }
