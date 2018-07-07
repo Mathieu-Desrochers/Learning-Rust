@@ -443,5 +443,5 @@ fn main() {
     structs();
     associated_functions();
     enums();
-    patterns();
+    unpacking();
 }
