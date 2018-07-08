@@ -451,6 +451,55 @@ fn traits() {
     }
 }
 
+fn closures() {
+    // a closure captures the variables it refers to
+    let x1 = 1;
+    let y1 = 2;
+    let _z1a = |value: i32| -> i32 { x1 + y1 + value };
+    let _z1b = |value: i32| -> i32 { x1 * value };
+
+    // this gives each closure a different type
+    // for the first closure we get something
+    // logically similar to
+    struct _Z1Struct<'a> {
+        x1: &'a i32,
+        y1: &'a i32,
+    }
+
+    // default captures are done by reference
+    // the first closure must not outlive x1 nor y1
+
+    // a common tait between all closures
+    // capturing variables by reference is Fn
+    let mut closures: Vec<&Fn(i32) -> i32> = Vec::new();
+    closures.push(&_z1a);
+    closures.push(&_z1b);
+
+    // the captured variables can instead
+    // be moved to the closure
+    let mut x2 = vec![1, 2, 3];
+    let y2 = move |value| {
+        x2.push(value);
+    };
+    // COMPILE ERROR: x2.push(5);
+
+    // the type of such closures is FnMut
+    // their usage is more restricted than Fn
+    let _z2: &FnMut(i32) = &y2;
+
+    // closures that move a value from
+    // their environment can only be called once
+    let x3 = vec![1, 2, 3];
+    let y3 = || {
+        let _z3 = x3;
+    };
+    y3();
+    // COMPILE ERROR: y3();
+
+    // the type of such closures is FnOnce
+    // their usage is more restricted than FnMut
+}
+
 #[test]
 fn unit_test() {
     assert_eq!(1, 1);
@@ -474,4 +523,5 @@ fn main() {
     associated_functions();
     enums();
     traits();
+    closures();
 }
